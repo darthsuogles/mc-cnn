@@ -1,0 +1,3 @@
+#!/bin/bash
+
+nvidia-docker run -it -v $PWD:/tmp/host -v /home/phissenschaft/local/data:/tmp/data th-mc-cnn
