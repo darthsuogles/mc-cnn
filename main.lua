@@ -82,7 +82,7 @@ if arch == 'slow' then
       cmd:option('-true1', 1)
       cmd:option('-false1', 4)
       cmd:option('-false2', 10)
-   
+
       if dataset == 'kitti' then
          cmd:option('-L1', 5)
          cmd:option('-cbca_i1', 2)
@@ -360,22 +360,28 @@ function fromfile(fname)
       return torch.Tensor()
    end
 
+   dim = torch.LongStorage(dim)
    local file = io.open(fname .. '.type')
    local type = file:read('*all')
 
+   local sz = 1
+   for i = 1, #dim do
+      sz = sz * dim[i]
+   end
+
    local x
    if type == 'float32' then
-      x = torch.FloatTensor(torch.FloatStorage(fname))
+      x = torch.FloatTensor(torch.FloatStorage(fname, false, sz))
    elseif type == 'int32' then
-      x = torch.IntTensor(torch.IntStorage(fname))
+      x = torch.IntTensor(torch.IntStorage(fname, false, sz))
    elseif type == 'int64' then
-      x = torch.LongTensor(torch.LongStorage(fname))
+      x = torch.LongTensor(torch.LongStorage(fname, false, sz))
    else
       print(fname, type)
       assert(false)
    end
 
-   x = x:reshape(torch.LongStorage(dim))
+   x = x:reshape(dim)
    return x
 end
 
@@ -541,7 +547,7 @@ end
 
 function print_net(net)
    local s
-   local t = torch.typename(net) 
+   local t = torch.typename(net)
    if t == 'cudnn.SpatialConvolution' then
       print(('conv(in=%d, out=%d, k=%d)'):format(net.nInputPlane, net.nOutputPlane, net.kW))
    elseif t == 'nn.SpatialConvolutionMM_dsparse' then
@@ -1203,7 +1209,7 @@ for _, i in ipairs(examples) do
       if dataset == 'kitti' or dataset == 'kitti2015' then
          pred_img = torch.FloatTensor(img_height, img_width):zero()
          pred_img:narrow(1, img_height - height + 1, height):copy(pred[{1,1}])
-        
+
          if dataset == 'kitti' then
             path = 'out'
          elseif dataset == 'kitti2015' then
