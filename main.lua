@@ -680,7 +680,6 @@ if opt.a == 'train_tr' or opt.a == 'train_all' or opt.a == 'time' then
       net_tr:add(nn.Linear(opt.nh2, 1))
       net_tr:add(cudnn.Sigmoid(false))
       net_tr:cuda()
-      -- The criteria for "slow" and "fast" variants are different
       criterion = nn.BCECriterion2():cuda()
 
       -- network for testing (make sure it's synched with net_tr)
@@ -752,7 +751,6 @@ if opt.a == 'train_tr' or opt.a == 'train_all' or opt.a == 'time' then
          end
       end
 
-      -- The criteria for "slow" and "fast" variants are different
       criterion = nn.Margin2(opt.m, opt.pow):cuda()
    end
 
@@ -885,7 +883,6 @@ if opt.a == 'train_tr' or opt.a == 'train_all' or opt.a == 'time' then
       if opt.debug then
          save_net(epoch)
       end
-      -- Printed: epoch, mean training error, time since beginning
       print(epoch, err_tr / err_tr_cnt, opt.lr, sys.clock() - time)
       collectgarbage()
    end
