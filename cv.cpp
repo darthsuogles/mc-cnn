@@ -14,7 +14,7 @@ extern "C" {
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
 
-#include<TH/TH.h>
+#include <TH/TH.h>
 
 int warp_affine(lua_State *L)
 {
