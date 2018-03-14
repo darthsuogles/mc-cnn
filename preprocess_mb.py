@@ -92,13 +92,15 @@ def read_im(fname, downsample):
         fname += '.H.png'
 
     print('reading image:', fname)
-    _img = cv2.imread(fname)
+    _should_load_color_image = 1 if color == 'rgb' else 0
+    _img = cv2.imread(fname, _should_load_color_image)
     x = _img.astype(np.float32)
     if color == 'rgb':
-        x = cv2.cvtColor(x, cv2.COLOR_BGR2RGB)
-        x = x.transpose(2, 0, 1)
+      x = cv2.cvtColor(x, cv2.COLOR_BGR2RGB)
+      x = x.transpose(2, 0, 1)
     else:
-        x = cv2.cvtColor(x, cv2.COLOR_BGR2GRAY)[None]
+      #x = cv2.cvtColor(x, cv2.COLOR_BGR2GRAY)[None]
+      x = x[None]
     x = (x - x.mean()) / x.std()
     return x[None]
 
