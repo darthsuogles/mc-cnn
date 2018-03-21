@@ -92,13 +92,15 @@ def read_im(fname, downsample):
         fname += '.H.png'
 
     print('reading image:', fname)
-    _img = cv2.imread(fname)
+    _should_load_color_image = 1 if color == 'rgb' else 0
+    _img = cv2.imread(fname, _should_load_color_image)
     x = _img.astype(np.float32)
     if color == 'rgb':
-        x = cv2.cvtColor(x, cv2.COLOR_BGR2RGB)
-        x = x.transpose(2, 0, 1)
+      x = cv2.cvtColor(x, cv2.COLOR_BGR2RGB)
+      x = x.transpose(2, 0, 1)
     else:
-        x = cv2.cvtColor(x, cv2.COLOR_BGR2GRAY)[None]
+      #x = cv2.cvtColor(x, cv2.COLOR_BGR2GRAY)[None]
+      x = x[None]
     x = (x - x.mean()) / x.std()
     return x[None]
 
@@ -270,48 +272,6 @@ for dir in ('conesH', 'teddyH'):
     meta.append((x0.shape[2], x0.shape[3], ndisp))
 
 print(np.vstack(nnz_tr).shape)
-
-### 2001 dataset ###
-base1 = 'data.mb/unzip/vision.middlebury.edu/stereo/data/scenes2001/data'
-for dir in sorted(os.listdir(base1)):
-    if dir == 'tsukuba':
-        fname_disp0, fname_disp1, fname_x0, fname_x1 = 'truedisp.row3.col3.pgm', '', 'scene1.row3.col3.ppm', 'scene1.row3.col4.ppm'
-    elif dir == 'map':
-        fname_disp0, fname_disp1, fname_x0, fname_x1 = 'disp0.pgm', 'disp1.pgm', 'im0.pgm', 'im1.pgm'
-    else:
-        fname_disp0, fname_disp1, fname_x0, fname_x1 = 'disp2.pgm', 'disp6.pgm', 'im2.ppm', 'im6.ppm'
-
-    base2 = os.path.join(base1, dir)
-    if os.path.isfile(os.path.join(base2, fname_disp0)):
-        print(dir)
-
-        XX = []
-        XX.append(None)
-
-        x0 = read_im(os.path.join(base2, fname_x0), False)
-        x1 = read_im(os.path.join(base2, fname_x1), False)
-        _, _, height, width = x0.shape
-        XX.append(np.concatenate((x0, x1)).reshape(1, 2, num_channels, height, width))
-
-        if dir == 'tsukuba':
-            disp0 = cv2.imread(os.path.join(base2, fname_disp0), 0).astype(np.float32) / 16
-            mask = cv2.imread(os.path.join(base2, 'nonocc.png'), 0)
-        else:
-            disp0 = cv2.imread(os.path.join(base2, fname_disp0), 0).astype(np.float32) / 8
-            disp1 = cv2.imread(os.path.join(base2, fname_disp1), 0).astype(np.float32) / 8
-
-            save_pfm('tmp/disp0.pfm', disp0, 1)
-            save_pfm('tmp/disp1.pfm', disp1, 1)
-            subprocess.check_output('computemask tmp/disp0.pfm tmp/disp1.pfm -1 tmp/mask.png'.split())
-
-            mask = cv2.imread('tmp/mask.png', 0)
-        disp0[mask != 255] = 0
-        y, x = np.nonzero(mask == 255)
-
-        X.append(XX)
-        nnz_tr.append(np.column_stack((np.zeros_like(y) + len(X), y, x, disp0[y, x])).astype(np.float32))
-        dispnoc.append(disp0.astype(np.float32))
-        meta.append((x0.shape[2], x0.shape[3], -1))
 
 ### test ###
 fname_submit = []

@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# Launch a docker container and attach current working directory to it
+# You can attach more volumes with more `-v /path/to/host/dir:/path/to/container/dir`
+nvidia-docker run -it \
+              -v $PWD:/host/workspace \
+              -v $HOME/local/data/middlebury/data.mb:/host/workspace/data.mb \
+              -w /host/workspace \
+              phissenschaft/mc-cnn:torch7-cuda9-cudnn7
